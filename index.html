@@ -11,17 +11,17 @@
 
     body {
       margin: 0;
-      background: #121212;
+      background: #ffffff;
       font-family: Arial, sans-serif;
-      color: #fff;
+      color: #000;
       display: flex;
       flex-direction: column;
       height: 100vh;
     }
 
     header {
-      background-color: #00ffc3;
-      color: #000;
+      background-color: #00bfff; /* Sky blue */
+      color: #fff;
       padding: 15px;
       text-align: center;
       font-size: 22px;
@@ -44,26 +44,28 @@
       font-size: 15px;
       line-height: 1.5;
       word-wrap: break-word;
+      white-space: pre-wrap;
     }
 
     .user {
       align-self: flex-end;
-      background-color: #00ffc3;
-      color: #000;
+      background-color: #00bfff; /* Sky blue */
+      color: #fff;
       border-bottom-right-radius: 0;
     }
 
     .bot {
       align-self: flex-start;
-      background-color: #1f1f1f;
+      background-color: #f1f1f1;
       border-bottom-left-radius: 0;
+      color: #000;
     }
 
     #input-area {
       display: flex;
       padding: 10px;
-      background-color: #181818;
-      border-top: 1px solid #333;
+      background-color: #e6e6e6;
+      border-top: 1px solid #ccc;
     }
 
     #input {
@@ -72,20 +74,20 @@
       border: none;
       border-radius: 10px;
       font-size: 15px;
-      background-color: #2a2a2a;
-      color: #fff;
+      background-color: #fff;
+      color: #000;
       outline: none;
     }
 
     #send {
       margin-left: 10px;
       padding: 10px 16px;
-      background-color: #00ffc3;
+      background-color: #00bfff;
       border: none;
       border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
-      color: #000;
+      color: #fff;
     }
 
     @media screen and (max-width: 600px) {
@@ -118,10 +120,10 @@
     const chatBox = document.getElementById("chat-box");
     const input = document.getElementById("input");
 
-    function appendMessage(text, sender) {
+    function appendMessage(html, sender) {
       const msg = document.createElement("div");
       msg.className = `bubble ${sender}`;
-      msg.innerText = text;
+      msg.innerHTML = html;
       chatBox.appendChild(msg);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -137,7 +139,7 @@
       const message = input.value.trim();
       if (!message) return;
 
-      appendMessage(message, "user");
+      appendMessage(escapeHtml(message), "user");
       input.value = "";
 
       appendMessage("...", "bot");
@@ -154,15 +156,23 @@
         const data = await response.json();
         const reply = data?.reply || "No reply from AI.";
 
-        // Replace the last bot message (loading) with the real one
-        const bubbles = document.querySelectorAll(".bubble.bot");
-        if (bubbles.length > 0) {
-          bubbles[bubbles.length - 1].innerText = reply;
+        const botBubble = document.querySelectorAll(".bubble.bot");
+        if (botBubble.length > 0) {
+          botBubble[botBubble.length - 1].innerHTML = reply;
         }
       } catch (err) {
-        console.error("Error:", err);
-        appendMessage("Error contacting AI.", "bot");
+        const botBubble = document.querySelectorAll(".bubble.bot");
+        if (botBubble.length > 0) {
+          botBubble[botBubble.length - 1].innerHTML = "Error contacting AI.";
+        }
       }
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     }
   </script>
 </body>
