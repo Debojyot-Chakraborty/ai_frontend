@@ -143,7 +143,10 @@
 
     async function sendMessage() {
       const message = input.value.trim();
-      if (!message) return;
+      if (!message) {
+        alert("Please enter a message!"); // Alert if no message is entered
+        return;
+      }
 
       appendMessage(escapeHtml(message), "user");
       chatHistory.push({ sender: "user", message: message }); // Save user message to history
