@@ -128,7 +128,7 @@
 
     function appendMessage(html, sender) {
       const msg = document.createElement("div");
-      msg.className = `bubble ${sender}`;
+      msg.className = bubble ${sender};
       msg.innerHTML = html;
       chatBox.appendChild(msg);
       chatBox.scrollTop = chatBox.scrollHeight;
@@ -165,8 +165,12 @@
 
         chatHistory.push({ sender: "bot", message: reply }); // Save bot response to history
 
-        // Append the bot's response as a new message
-        appendMessage(reply, "bot");
+        const botBubble = document.querySelectorAll(".bubble.bot");
+        if (botBubble.length > 0) {
+          botBubble[botBubble.length - 1].innerHTML = reply;
+        } else {
+          appendMessage(reply, "bot");
+        }
       } catch (err) {
         const botBubble = document.querySelectorAll(".bubble.bot");
         if (botBubble.length > 0) {
