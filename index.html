@@ -107,6 +107,21 @@
       color: #fff;
     }
 
+    /* Reset Button */
+    #reset {
+      background-color: red;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      z-index: 1000;
+    }
+
     /* Mobile-friendly styling */
     @media screen and (max-width: 600px) {
       header { 
@@ -147,6 +162,9 @@
   </style>
 </head>
 <body>
+  <!-- Reset Button -->
+  <button id="reset" onclick="resetChat()">Reset Chat</button>
+
   <header>HUDZZ AI</header>
 
   <div id="chat-box"></div>
@@ -231,6 +249,12 @@
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
+    }
+
+    // Reset chat history
+    function resetChat() {
+      localStorage.removeItem("chatHistory");
+      chatBox.innerHTML = "";
     }
   </script>
 </body>
