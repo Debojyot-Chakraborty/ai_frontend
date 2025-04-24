@@ -13,9 +13,8 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden;
       font-family: Arial, sans-serif;
-      background: #f0f0f0;
+      background: #f5f5f5;
       color: #000;
     }
 
@@ -25,7 +24,7 @@
     }
 
     header {
-      background-color: #00bfff;
+      background-color: #222;
       color: #fff;
       padding: 15px;
       text-align: center;
@@ -35,6 +34,18 @@
       top: 0;
       left: 0;
       right: 0;
+      z-index: 998;
+    }
+
+    #reset-btn {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 22px;
+      cursor: pointer;
+      background-color: transparent;
+      border: none;
+      color: #fff;
       z-index: 999;
     }
 
@@ -47,7 +58,6 @@
       flex-direction: column;
       gap: 10px;
       height: calc(100vh - 130px);
-      overflow-x: hidden;
     }
 
     .bubble {
@@ -64,16 +74,16 @@
 
     .user {
       align-self: flex-end;
-      background-color: #00bfff;
+      background-color: #333;
       color: #fff;
       border-bottom-right-radius: 0;
     }
 
     .bot {
       align-self: flex-start;
-      background-color: #f1f1f1;
-      border-bottom-left-radius: 0;
+      background-color: #eaeaea;
       color: #000;
+      border-bottom-left-radius: 0;
     }
 
     #input-area {
@@ -81,6 +91,7 @@
       padding: 10px;
       background-color: #e6e6e6;
       border-top: 1px solid #ccc;
+      flex-wrap: wrap;
     }
 
     #input {
@@ -92,36 +103,24 @@
       background-color: #fff;
       color: #000;
       outline: none;
+      min-width: 100px;
     }
 
-    #send {
-      margin-left: 10px;
-      padding: 10px 16px;
+    .input-btn {
+      margin-left: 6px;
+      padding: 10px;
       background-color: #000;
       border: none;
       border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
       color: #fff;
+      font-size: 15px;
     }
 
     .typing-indicator {
       color: #999;
       font-size: 14px;
-    }
-
-    #reset-btn {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      font-size: 20px;
-      cursor: pointer;
-      color: #fff;
-      background-color: #000;
-      border-radius: 50%;
-      padding: 8px 12px;
-      border: none;
-      z-index: 1000;
     }
 
     @keyframes bubbleIn {
@@ -138,19 +137,23 @@
     @media screen and (max-width: 600px) {
       header { font-size: 18px; padding: 12px; }
       #input { font-size: 14px; }
-      #send { font-size: 14px; padding: 8px 12px; }
+      .input-btn { font-size: 14px; padding: 8px; }
       .bubble { font-size: 14px; }
+      #reset-btn { font-size: 20px; }
     }
   </style>
 </head>
 <body>
   <header>HUDZZ AI</header>
+  <button id="reset-btn" onclick="resetChat()">🔄️</button>
   <div id="chat-box"></div>
+
   <div id="input-area">
     <input type="text" id="input" placeholder="Type a message..." onkeydown="handleEnter(event)" />
-    <button id="send" onclick="sendMessage()">Send</button>
+    <button class="input-btn" onclick="insertEmoji()">😊</button>
+    <button class="input-btn" onclick="startVoice()">🎙️</button>
+    <button class="input-btn" onclick="sendMessage()">Send</button>
   </div>
-  <button id="reset-btn" onclick="resetChat()">🔄</button>
 
   <script>
     const chatBox = document.getElementById("chat-box");
@@ -229,6 +232,34 @@
         localStorage.removeItem("chatHistory");
         chatBox.innerHTML = "";
       }
+    }
+
+    function insertEmoji() {
+      input.value += "😊";
+      input.focus();
+    }
+
+    function startVoice() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert("Voice input not supported in this browser.");
+        return;
+      }
+
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        input.value += transcript;
+      };
+
+      recognition.onerror = function(event) {
+        alert("Voice error: " + event.error);
+      };
+
+      recognition.start();
     }
   </script>
 </body>
