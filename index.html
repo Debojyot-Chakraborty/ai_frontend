@@ -135,6 +135,7 @@
     }
 
     function handleEnter(e) {
+      console.log("Enter key pressed.");  // Log when Enter is pressed
       if (e.key === "Enter") {
         e.preventDefault();
         sendMessage();
@@ -143,6 +144,7 @@
 
     async function sendMessage() {
       const message = input.value.trim();
+      console.log("sendMessage called with input: " + message);  // Log input value
       if (!message) {
         alert("Please enter a message!"); // Alert if no message is entered
         return;
