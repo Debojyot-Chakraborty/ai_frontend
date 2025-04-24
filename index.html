@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HUDZZ AI Chat</title>
-  <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -142,6 +141,30 @@
       .bubble { font-size: 14px; }
       #reset-btn { font-size: 20px; }
     }
+
+    /* Custom emoji picker styles */
+    #emoji-picker {
+      display: none;
+      position: absolute;
+      bottom: 50px;
+      left: 10px;
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+
+    #emoji-picker span {
+      font-size: 24px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    #emoji-picker span:hover {
+      background-color: #eee;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
@@ -156,9 +179,25 @@
     <button class="input-btn" onclick="sendMessage()">Send</button>
   </div>
 
+  <!-- Custom Emoji Picker -->
+  <div class="emoji-picker" id="emoji-picker">
+    <span onclick="addEmoji('😎')">😎</span>
+    <span onclick="addEmoji('😂')">😂</span>
+    <span onclick="addEmoji('🔥')">🔥</span>
+    <span onclick="addEmoji('❤️')">❤️</span>
+    <span onclick="addEmoji('🤔')">🤔</span>
+    <span onclick="addEmoji('👀')">👀</span>
+    <span onclick="addEmoji('🥹')">🥹</span>
+    <span onclick="addEmoji('🤯')">🤯</span>
+    <span onclick="addEmoji('💀')">💀</span>
+    <span onclick="addEmoji('🙏')">🙏</span>
+  </div>
+
   <script>
     const chatBox = document.getElementById("chat-box");
     const input = document.getElementById("input");
+    const emojiPicker = document.getElementById("emoji-picker");
+    const emojiBtn = document.getElementById("emoji-btn");
 
     window.onload = function() {
       const chatHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
@@ -258,24 +297,17 @@
       recognition.start();
     }
 
-    // 👉 Emoji picker logic
-    const emojiTrigger = document.getElementById('emoji-btn');
-    const picker = new EmojiButton({
-      position: 'top-start',
-      theme: 'light',
-      autoHide: true,
-      showRecents: true,
-      showSearch: true,
+    // Function to show or hide emoji picker
+    emojiBtn.addEventListener('click', () => {
+      emojiPicker.style.display = emojiPicker.style.display === "none" || emojiPicker.style.display === "" ? "block" : "none";
     });
 
-    picker.on('emoji', emoji => {
+    // Function to add emoji to the input field
+    function addEmoji(emoji) {
       input.value += emoji;
+      emojiPicker.style.display = "none"; // Hide emoji picker after selecting emoji
       input.focus();
-    });
-
-    emojiTrigger.addEventListener('click', () => {
-      picker.togglePicker(emojiTrigger);
-    });
+    }
   </script>
 </body>
 </html>
