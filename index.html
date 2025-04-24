@@ -135,7 +135,6 @@
     }
 
     function handleEnter(e) {
-      console.log("Enter key pressed.");  // Log when Enter is pressed
       if (e.key === "Enter") {
         e.preventDefault();
         sendMessage();
@@ -144,11 +143,7 @@
 
     async function sendMessage() {
       const message = input.value.trim();
-      console.log("sendMessage called with input: " + message);  // Log input value
-      if (!message) {
-        alert("Please enter a message!"); // Alert if no message is entered
-        return;
-      }
+      if (!message) return;
 
       appendMessage(escapeHtml(message), "user");
       chatHistory.push({ sender: "user", message: message }); // Save user message to history
@@ -170,12 +165,8 @@
 
         chatHistory.push({ sender: "bot", message: reply }); // Save bot response to history
 
-        const botBubble = document.querySelectorAll(".bubble.bot");
-        if (botBubble.length > 0) {
-          botBubble[botBubble.length - 1].innerHTML = reply;
-        } else {
-          appendMessage(reply, "bot");
-        }
+        // Append the bot's response as a new message
+        appendMessage(reply, "bot");
       } catch (err) {
         const botBubble = document.querySelectorAll(".bubble.bot");
         if (botBubble.length > 0) {
