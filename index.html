@@ -22,6 +22,7 @@
     body {
       display: flex;
       flex-direction: column;
+      height: 100vh;
     }
 
     header {
@@ -36,6 +37,7 @@
       left: 0;
       right: 0;
       z-index: 999;
+      width: 100%;
     }
 
     #chat-box {
@@ -78,6 +80,9 @@
       padding: 10px;
       background-color: #e6e6e6;
       border-top: 1px solid #ccc;
+      position: sticky;
+      bottom: 0;
+      z-index: 1000;
     }
 
     #input {
@@ -102,36 +107,47 @@
       color: #fff;
     }
 
-    .clear-data-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      padding: 10px 15px;
-      background-color: #ff5733;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .clear-data-btn:hover {
-      background-color: #e03e2f;
-    }
-
+    /* Mobile-friendly styling */
     @media screen and (max-width: 600px) {
-      header { font-size: 18px; padding: 12px; }
-      #input { font-size: 14px; }
-      #send { font-size: 14px; padding: 8px 12px; }
-      .bubble { font-size: 14px; }
+      header { 
+        font-size: 18px; 
+        padding: 12px; 
+      }
+      #input { 
+        font-size: 14px; 
+        padding: 8px; 
+      }
+      #send { 
+        font-size: 14px; 
+        padding: 8px 12px; 
+      }
+      .bubble { 
+        font-size: 14px; 
+      }
+      #input-area {
+        padding: 8px;
+      }
+      #send {
+        padding: 8px 12px;
+      }
     }
+
+    /* Ensuring input field and button are easy to interact with on mobile */
+    @media screen and (max-width: 400px) {
+      #input {
+        font-size: 14px;
+        padding: 12px;
+      }
+      #send {
+        font-size: 14px;
+        padding: 12px 14px;
+      }
+    }
+
   </style>
 </head>
 <body>
   <header>HUDZZ AI</header>
-
-  <!-- Clear Data Button -->
-  <button class="clear-data-btn" onclick="clearData()">Clear Data</button>
 
   <div id="chat-box"></div>
 
@@ -215,16 +231,6 @@
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
-    }
-
-    // Function to clear chat history and localStorage
-    function clearData() {
-      if (confirm("Are you sure you want to clear all chat data?")) {
-        // Clear chat history in the UI
-        chatBox.innerHTML = "";
-        // Clear chat history in localStorage
-        localStorage.removeItem("chatHistory");
-      }
     }
   </script>
 </body>
