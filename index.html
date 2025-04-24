@@ -124,25 +124,7 @@
     const chatBox = document.getElementById("chat-box");
     const input = document.getElementById("input");
 
-    // Load chat history from localStorage
-    window.onload = function() {
-      const chatHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-      chatHistory.forEach(msg => {
-        appendMessage(msg.text, msg.sender);
-      });
-    };
-
-    // Save chat history to localStorage
-    function saveChatHistory() {
-      const messages = [];
-      document.querySelectorAll('.bubble').forEach(bubble => {
-        messages.push({
-          text: bubble.innerText,
-          sender: bubble.classList.contains("user") ? "user" : "bot"
-        });
-      });
-      localStorage.setItem("chatHistory", JSON.stringify(messages));
-    }
+    let chatHistory = [];  // Array to store the chat history
 
     function appendMessage(html, sender) {
       const msg = document.createElement("div");
@@ -150,7 +132,6 @@
       msg.innerHTML = html;
       chatBox.appendChild(msg);
       chatBox.scrollTop = chatBox.scrollHeight;
-      saveChatHistory(); // Save chat history after appending each message
     }
 
     function handleEnter(e) {
@@ -165,6 +146,7 @@
       if (!message) return;
 
       appendMessage(escapeHtml(message), "user");
+      chatHistory.push({ sender: "user", message: message }); // Save user message to history
       input.value = "";
 
       appendMessage("...", "bot");
@@ -175,15 +157,19 @@
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ message })
+          body: JSON.stringify({ messages: chatHistory }) // Send chat history to the AI
         });
 
         const data = await response.json();
         const reply = data?.reply || "No reply from AI.";
 
+        chatHistory.push({ sender: "bot", message: reply }); // Save bot response to history
+
         const botBubble = document.querySelectorAll(".bubble.bot");
         if (botBubble.length > 0) {
           botBubble[botBubble.length - 1].innerHTML = reply;
+        } else {
+          appendMessage(reply, "bot");
         }
       } catch (err) {
         const botBubble = document.querySelectorAll(".bubble.bot");
