@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HUDZZ AI Chat</title>
   <style>
     * {
       box-sizing: border-box;
     }
 
-    html,
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       height: 100%;
@@ -41,14 +39,14 @@
     }
 
     #chat-box {
-      margin-top: 60px;
+      margin-top: 60px; /* below fixed header */
       flex: 1;
       overflow-y: auto;
       padding: 15px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      height: calc(100vh - 130px);
+      height: calc(100vh - 130px); /* adjust for header + input area */
     }
 
     .bubble {
@@ -104,204 +102,82 @@
       color: #fff;
     }
 
-    .form-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
+    @media screen and (max-width: 600px) {
+      header { font-size: 18px; padding: 12px; }
+      #input { font-size: 14px; }
+      #send { font-size: 14px; padding: 8px 12px; }
+      .bubble { font-size: 14px; }
     }
-
-    .form-container input {
-      margin-bottom: 10px;
-      padding: 10px;
-      font-size: 14px;
-      width: 300px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    .form-container button {
-      padding: 10px 15px;
-      background-color: #00bfff;
-      border: none;
-      color: white;
-      font-size: 16px;
-      width: 300px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    .form-container button:hover {
-      background-color: #007bb5;
-    }
-
-    .form-container a {
-      margin-top: 10px;
-      text-decoration: none;
-      color: #00bfff;
-      font-size: 14px;
-    }
-
-    .form-container a:hover {
-      color: #007bb5;
-    }
-
-    .form-container .error-message {
-      color: red;
-      font-size: 14px;
-    }
-
   </style>
 </head>
-
 <body>
-
   <header>HUDZZ AI</header>
 
-  <div class="form-container" id="signup-form">
-    <h2>Signup</h2>
-    <input type="text" id="signup-username" placeholder="Enter Username" />
-    <input type="password" id="signup-password" placeholder="Enter Password" />
-    <button onclick="signup()">Sign Up</button>
-    <p>Already have an account? <a href="javascript:void(0);" onclick="showSignIn()">Sign In</a></p>
-    <p class="error-message" id="signup-error"></p>
-  </div>
+  <div id="chat-box"></div>
 
-  <div class="form-container" id="signin-form" style="display:none;">
-    <h2>Sign In</h2>
-    <input type="text" id="signin-username" placeholder="Enter Username" />
-    <input type="password" id="signin-password" placeholder="Enter Password" />
-    <button onclick="signin()">Sign In</button>
-    <p>Forgot your password? <a href="javascript:void(0);" onclick="showForgotPassword()">Forgot Password</a></p>
-    <p>Don't have an account? <a href="javascript:void(0);" onclick="showSignup()">Sign Up</a></p>
-    <p class="error-message" id="signin-error"></p>
-  </div>
-
-  <div class="form-container" id="forgot-password-form" style="display:none;">
-    <h2>Forgot Password</h2>
-    <input type="text" id="forgot-username" placeholder="Enter Username" />
-    <button onclick="forgotPassword()">Reset Password</button>
-    <p>Remember your password? <a href="javascript:void(0);" onclick="showSignIn()">Sign In</a></p>
-    <p class="error-message" id="forgot-password-error"></p>
-  </div>
-
-  <div id="chat-box" style="display:none;">
-    <div id="chat"></div>
-    <div id="input-area">
-      <input type="text" id="input" placeholder="Type a message..." onkeydown="handleEnter(event)" />
-      <button id="send" onclick="sendMessage()">Send</button>
-    </div>
+  <div id="input-area">
+    <input type="text" id="input" placeholder="Type a message..." onkeydown="handleEnter(event)" />
+    <button id="send" onclick="sendMessage()">Send</button>
   </div>
 
   <script>
-    // Show different forms
-    function showSignup() {
-      document.getElementById('signin-form').style.display = 'none';
-      document.getElementById('signup-form').style.display = 'flex';
-      document.getElementById('forgot-password-form').style.display = 'none';
-    }
+    const chatBox = document.getElementById("chat-box");
+    const input = document.getElementById("input");
 
-    function showSignIn() {
-      document.getElementById('signin-form').style.display = 'flex';
-      document.getElementById('signup-form').style.display = 'none';
-      document.getElementById('forgot-password-form').style.display = 'none';
-    }
-
-    function showForgotPassword() {
-      document.getElementById('signin-form').style.display = 'none';
-      document.getElementById('signup-form').style.display = 'none';
-      document.getElementById('forgot-password-form').style.display = 'flex';
-    }
-
-    // Signup logic
-    function signup() {
-      const username = document.getElementById('signup-username').value;
-      const password = document.getElementById('signup-password').value;
-
-      if (username && password) {
-        alert('Signup Successful!');
-        showSignIn();
-      } else {
-        document.getElementById('signup-error').textContent = 'Please fill all fields!';
-      }
-    }
-
-    // Sign-in logic
-    function signin() {
-      const username = document.getElementById('signin-username').value;
-      const password = document.getElementById('signin-password').value;
-
-      if (username && password) {
-        alert('Sign In Successful!');
-        document.getElementById('signin-form').style.display = 'none';
-        document.getElementById('chat-box').style.display = 'flex';
-      } else {
-        document.getElementById('signin-error').textContent = 'Invalid credentials!';
-      }
-    }
-
-    // Forgot Password logic
-    function forgotPassword() {
-      const username = document.getElementById('forgot-username').value;
-
-      if (username) {
-        alert('Password reset link sent!');
-        showSignIn();
-      } else {
-        document.getElementById('forgot-password-error').textContent = 'Please enter a username!';
-      }
-    }
-
-    // Chatbox functionality (same as before)
     function appendMessage(html, sender) {
-      const msg = document.createElement('div');
+      const msg = document.createElement("div");
       msg.className = `bubble ${sender}`;
       msg.innerHTML = html;
-      document.getElementById('chat').appendChild(msg);
-      document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     function handleEnter(e) {
-      if (e.key === 'Enter') {
+      if (e.key === "Enter") {
         e.preventDefault();
         sendMessage();
       }
     }
 
     async function sendMessage() {
-      const message = document.getElementById('input').value.trim();
+      const message = input.value.trim();
       if (!message) return;
 
-      appendMessage(message, 'user');
-      document.getElementById('input').value = '';
+      appendMessage(escapeHtml(message), "user");
+      input.value = "";
 
-      appendMessage('...', 'bot');
+      appendMessage("...", "bot");
 
       try {
-        const response = await fetch('https://ai-chatbot-rk59.onrender.com/chat', {
-          method: 'POST',
+        const response = await fetch("https://ai-chatbot-rk59.onrender.com/chat", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json"
           },
-          body: JSON.stringify({ message }),
+          body: JSON.stringify({ message })
         });
 
         const data = await response.json();
-        const reply = data?.reply || 'No reply from AI.';
+        const reply = data?.reply || "No reply from AI.";
 
-        const botBubble = document.querySelectorAll('.bubble.bot');
+        const botBubble = document.querySelectorAll(".bubble.bot");
         if (botBubble.length > 0) {
           botBubble[botBubble.length - 1].innerHTML = reply;
         }
       } catch (err) {
-        const botBubble = document.querySelectorAll('.bubble.bot');
+        const botBubble = document.querySelectorAll(".bubble.bot");
         if (botBubble.length > 0) {
-          botBubble[botBubble.length - 1].innerHTML = 'Error contacting AI.';
+          botBubble[botBubble.length - 1].innerHTML = "Error contacting AI.";
         }
       }
     }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
   </script>
 </body>
-
 </html>
