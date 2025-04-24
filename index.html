@@ -172,7 +172,6 @@
   <div id="input-area">  
     <input type="text" id="input" placeholder="Type a message..." onkeydown="handleEnter(event)" />  
     <button id="emoji-btn" class="input-btn">😊</button>  
-    <button class="input-btn" onclick="startVoice()">🎙️</button>  
     <button class="input-btn" onclick="sendMessage()">Send</button>  
   </div>  
   <div class="emoji-picker" id="emoji-picker">  
@@ -218,8 +217,6 @@
       chatBox.appendChild(msg);  
       chatBox.scrollTop = chatBox.scrollHeight;  
       saveChatHistory();  
-
-      if (sender === "bot") speakText(html); // Speak the bot reply  
       return msg;  
     }  
 
@@ -270,29 +267,6 @@
       }  
     }  
 
-    function startVoice() {  
-      if (!('webkitSpeechRecognition' in window)) {  
-        alert("Voice input not supported in this browser.");  
-        return;  
-      }  
-
-      const recognition = new webkitSpeechRecognition();  
-      recognition.lang = "en-US";  
-      recognition.continuous = false;  
-      recognition.interimResults = false;  
-
-      recognition.onresult = function(event) {  
-        const transcript = event.results[0][0].transcript;  
-        input.value += transcript;  
-      };  
-
-      recognition.onerror = function(event) {  
-        alert("Voice error: " + event.error);  
-      };  
-
-      recognition.start();  
-    }  
-
     emojiBtn.addEventListener('click', () => {  
       emojiPicker.style.display = emojiPicker.style.display === "none" || emojiPicker.style.display === "" ? "block" : "none";  
     });  
@@ -301,15 +275,6 @@
       input.value += emoji;  
       emojiPicker.style.display = "none";  
       input.focus();  
-    }  
-
-    // Speak bot's reply aloud  
-    function speakText(text) {  
-      if ('speechSynthesis' in window) {  
-        const utterance = new SpeechSynthesisUtterance(text);  
-        utterance.lang = 'en-US';  
-        window.speechSynthesis.speak(utterance);  
-      }  
     }  
   </script>  
 </body>  
