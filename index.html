@@ -25,7 +25,7 @@
     }
 
     header {
-      background-color: #333; /* Dark Gray */
+      background-color: #00bfff;
       color: #fff;
       padding: 15px;
       text-align: center;
@@ -36,19 +36,6 @@
       left: 0;
       right: 0;
       z-index: 999;
-    }
-
-    #reset-btn {
-      position: absolute;
-      left: 15px;
-      top: 15px;
-      padding: 10px;
-      background-color: #f44336;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 18px;
     }
 
     #chat-box {
@@ -65,20 +52,19 @@
 
     .bubble {
       max-width: 80%;
-      padding: 12px 16px;
-      border-radius: 25px;
+      padding: 10px 14px;
+      border-radius: 15px;
       font-size: 15px;
       line-height: 1.5;
       word-wrap: break-word;
       white-space: pre-wrap;
       opacity: 0;
       animation: bubbleIn 0.5s forwards;
-      margin-bottom: 10px;
     }
 
     .user {
       align-self: flex-end;
-      background-color: rgba(0, 0, 0, 0.6); /* Light black */
+      background-color: #00bfff;
       color: #fff;
       border-bottom-right-radius: 0;
     }
@@ -86,9 +72,8 @@
     .bot {
       align-self: flex-start;
       background-color: #f1f1f1;
-      color: #000;
       border-bottom-left-radius: 0;
-      position: relative;
+      color: #000;
     }
 
     #input-area {
@@ -96,6 +81,7 @@
       padding: 10px;
       background-color: #e6e6e6;
       border-top: 1px solid #ccc;
+      align-items: center;
     }
 
     #input {
@@ -109,7 +95,7 @@
       outline: none;
     }
 
-    #send {
+    #send, #emoji-btn, #voice-btn {
       margin-left: 10px;
       padding: 10px 16px;
       background-color: #000;
@@ -120,39 +106,41 @@
       color: #fff;
     }
 
-    #voice-btn {
-      margin-left: 10px;
-      padding: 10px;
-      background-color: #ff9900;
+    #emoji-picker {
+      position: absolute;
+      bottom: 70px;
+      right: 20px;
+      display: none;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #emoji-picker button {
+      background: transparent;
       border: none;
-      border-radius: 50%;
-      font-size: 18px;
-      color: white;
+      font-size: 20px;
       cursor: pointer;
+      padding: 5px;
     }
 
     .typing-indicator {
       color: #999;
       font-size: 14px;
-      margin-top: 10px;
-      display: inline-block;
     }
 
-    .emoji-picker {
-      font-size: 22px;
-      display: flex;
-      gap: 5px;
-      margin-top: 10px;
-    }
-
-    .emoji-picker button {
-      border: none;
-      background: transparent;
+    #reset-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 20px;
       cursor: pointer;
-    }
-
-    .loading {
-      animation: spin 1s infinite linear;
+      color: #fff;
+      background-color: #00bfff;
+      border-radius: 50%;
+      padding: 8px;
+      border: none;
     }
 
     @keyframes bubbleIn {
@@ -166,11 +154,6 @@
       }
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
     @media screen and (max-width: 600px) {
       header { font-size: 18px; padding: 12px; }
       #input { font-size: 14px; }
@@ -180,26 +163,28 @@
   </style>
 </head>
 <body>
-  <button id="reset-btn" onclick="resetChat()">🗑️</button>
   <header>HUDZZ AI</header>
   <div id="chat-box"></div>
   <div id="input-area">
     <input type="text" id="input" placeholder="Type a message..." onkeydown="handleEnter(event)" />
     <button id="send" onclick="sendMessage()">Send</button>
-    <button id="voice-btn" onclick="startVoiceInput()">🎤</button>
+    <button id="emoji-btn" onclick="toggleEmojiPicker()">😊</button>
+    <button id="voice-btn" onclick="startVoiceMessage()">🎤</button>
   </div>
-  <div class="emoji-picker" id="emoji-picker">
-    <button onclick="insertEmoji('😀')">😀</button>
-    <button onclick="insertEmoji('😂')">😂</button>
-    <button onclick="insertEmoji('😎')">😎</button>
-    <button onclick="insertEmoji('❤️')">❤️</button>
+  <div id="emoji-picker">
+    <button onclick="addEmoji('😀')">😀</button>
+    <button onclick="addEmoji('😄')">😄</button>
+    <button onclick="addEmoji('😁')">😁</button>
+    <button onclick="addEmoji('😎')">😎</button>
+    <button onclick="addEmoji('😍')">😍</button>
+    <button onclick="addEmoji('😭')">😭</button>
   </div>
+  <button id="reset-btn" onclick="resetChat()">🔄</button>
 
   <script>
     const chatBox = document.getElementById("chat-box");
     const input = document.getElementById("input");
     const emojiPicker = document.getElementById("emoji-picker");
-    const voiceBtn = document.getElementById("voice-btn");
     const resetBtn = document.getElementById("reset-btn");
 
     window.onload = function() {
@@ -244,6 +229,7 @@
       appendMessage(escapeHtml(message), "user");
       input.value = "";
 
+      // Typing indicator
       const typingIndicator = appendMessage("<em>Bot is typing...</em>", "bot");
 
       try {
@@ -272,30 +258,42 @@
         .replace(/>/g, "&gt;");
     }
 
-    function insertEmoji(emoji) {
-      input.value += emoji;
-      input.focus();
-    }
-
-    function startVoiceInput() {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = "en-US";
-      recognition.start();
-
-      recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
-        input.value = transcript;
-      };
-
-      recognition.onerror = function(event) {
-        alert("Voice recognition failed. Please try again.");
-      };
-    }
-
     function resetChat() {
       if (confirm("Are you sure you want to reset the chat?")) {
         localStorage.removeItem("chatHistory");
         chatBox.innerHTML = "";
+      }
+    }
+
+    function toggleEmojiPicker() {
+      emojiPicker.style.display = emojiPicker.style.display === "block" ? "none" : "block";
+    }
+
+    function addEmoji(emoji) {
+      input.value += emoji;
+      emojiPicker.style.display = "none";
+    }
+
+    // Voice message functionality
+    let recognition;
+
+    function startVoiceMessage() {
+      if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = "en-US";
+        recognition.start();
+
+        recognition.onresult = function(event) {
+          const voiceMessage = event.results[0][0].transcript;
+          input.value = voiceMessage;
+          sendMessage();
+        };
+
+        recognition.onerror = function(event) {
+          console.log("Voice recognition error: ", event.error);
+        };
+      } else {
+        alert("Your browser doesn't support voice recognition.");
       }
     }
   </script>
