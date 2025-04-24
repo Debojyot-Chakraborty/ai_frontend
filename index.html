@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HUDZZ AI Chat</title>
+  <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -145,12 +146,12 @@
 </head>
 <body>
   <header>HUDZZ AI</header>
-  <button id="reset-btn" onclick="resetChat()">🔄️</button>
+  <button id="reset-btn" onclick="resetChat()">🗑️</button>
   <div id="chat-box"></div>
 
   <div id="input-area">
     <input type="text" id="input" placeholder="Type a message..." onkeydown="handleEnter(event)" />
-    <button class="input-btn" onclick="insertEmoji()">😊</button>
+    <button id="emoji-btn" class="input-btn">😊</button>
     <button class="input-btn" onclick="startVoice()">🎙️</button>
     <button class="input-btn" onclick="sendMessage()">Send</button>
   </div>
@@ -234,11 +235,6 @@
       }
     }
 
-    function insertEmoji() {
-      input.value += "😊";
-      input.focus();
-    }
-
     function startVoice() {
       if (!('webkitSpeechRecognition' in window)) {
         alert("Voice input not supported in this browser.");
@@ -261,6 +257,25 @@
 
       recognition.start();
     }
+
+    // 👉 Emoji picker logic
+    const emojiTrigger = document.getElementById('emoji-btn');
+    const picker = new EmojiButton({
+      position: 'top-start',
+      theme: 'light',
+      autoHide: true,
+      showRecents: true,
+      showSearch: true,
+    });
+
+    picker.on('emoji', emoji => {
+      input.value += emoji;
+      input.focus();
+    });
+
+    emojiTrigger.addEventListener('click', () => {
+      picker.togglePicker(emojiTrigger);
+    });
   </script>
 </body>
 </html>
