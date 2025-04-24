@@ -8,24 +8,20 @@
     * {
       box-sizing: border-box;
     }
-
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden;
       font-family: Arial, sans-serif;
-      background: #ffffff;
+      background: #f5f5f5;
       color: #000;
     }
-
     body {
       display: flex;
       flex-direction: column;
     }
-
     header {
-      background-color: #00bfff;
+      background-color: #414a4c;
       color: #fff;
       padding: 15px;
       text-align: center;
@@ -35,20 +31,29 @@
       top: 0;
       left: 0;
       right: 0;
+      z-index: 998;
+    }
+    #reset-btn {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 22px;
+      cursor: pointer;
+      background-color: transparent;
+      border: none;
+      color: #fff;
       z-index: 999;
     }
-
     #chat-box {
-      margin-top: 60px; /* below fixed header */
+      margin-top: 60px;
       flex: 1;
       overflow-y: auto;
       padding: 15px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      height: calc(100vh - 130px); /* adjust for header + input area */
+      height: calc(100vh - 130px);
     }
-
     .bubble {
       max-width: 80%;
       padding: 10px 14px;
@@ -57,29 +62,28 @@
       line-height: 1.5;
       word-wrap: break-word;
       white-space: pre-wrap;
+      opacity: 0;
+      animation: bubbleIn 0.5s forwards;
     }
-
     .user {
       align-self: flex-end;
-      background-color: #00bfff;
+      background-color: #6a7b88;
       color: #fff;
       border-bottom-right-radius: 0;
     }
-
     .bot {
       align-self: flex-start;
-      background-color: #f1f1f1;
-      border-bottom-left-radius: 0;
+      background-color: #eaeaea;
       color: #000;
+      border-bottom-left-radius: 0;
     }
-
     #input-area {
       display: flex;
       padding: 10px;
       background-color: #e6e6e6;
       border-top: 1px solid #ccc;
+      flex-wrap: wrap;
     }
-
     #input {
       flex: 1;
       padding: 10px;
@@ -89,53 +93,91 @@
       background-color: #fff;
       color: #000;
       outline: none;
+      min-width: 100px;
     }
-
-    #send {
-      margin-left: 10px;
-      padding: 10px 16px;
-      background-color: #00bfff;
+    .input-btn {
+      margin-left: 6px;
+      padding: 10px;
+      background-color: #000;
       border: none;
       border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
       color: #fff;
+      font-size: 15px;
     }
-
+    @keyframes bubbleIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     @media screen and (max-width: 600px) {
       header { font-size: 18px; padding: 12px; }
       #input { font-size: 14px; }
-      #send { font-size: 14px; padding: 8px 12px; }
+      .input-btn { font-size: 14px; padding: 8px; }
       .bubble { font-size: 14px; }
+      #reset-btn { font-size: 20px; }
+    }
+    #emoji-picker {
+      display: none;
+      position: absolute;
+      bottom: 50px;
+      left: 10px;
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+    #emoji-picker span {
+      font-size: 24px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    #emoji-picker span:hover {
+      background-color: #eee;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
   <header>HUDZZ AI</header>
-
+  <button id="reset-btn" onclick="resetChat()">🗑️</button>
   <div id="chat-box"></div>
 
   <div id="input-area">
     <input type="text" id="input" placeholder="Type a message..." onkeydown="handleEnter(event)" />
-    <button id="send" onclick="sendMessage()">Send</button>
+    <button id="emoji-btn" class="input-btn">😊</button>
+    <button class="input-btn" onclick="startVoice()">🎙️</button>
+    <button class="input-btn" onclick="sendMessage()">Send</button>
+  </div>
+
+  <div class="emoji-picker" id="emoji-picker">
+    <span onclick="addEmoji('😎')">😎</span>
+    <span onclick="addEmoji('😂')">😂</span>
+    <span onclick="addEmoji('🔥')">🔥</span>
+    <span onclick="addEmoji('❤️')">❤️</span>
+    <span onclick="addEmoji('🤔')">🤔</span>
+    <span onclick="addEmoji('👀')">👀</span>
+    <span onclick="addEmoji('🥹')">🥹</span>
+    <span onclick="addEmoji('🤯')">🤯</span>
+    <span onclick="addEmoji('💀')">💀</span>
+    <span onclick="addEmoji('🙏')">🙏</span>
   </div>
 
   <script>
     const chatBox = document.getElementById("chat-box");
     const input = document.getElementById("input");
+    const emojiPicker = document.getElementById("emoji-picker");
+    const emojiBtn = document.getElementById("emoji-btn");
 
-    // Load chat history from localStorage
-    window.onload = function() {
+    window.onload = function () {
       const chatHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-      chatHistory.forEach(msg => {
-        appendMessage(msg.text, msg.sender);
-      });
+      chatHistory.forEach(msg => appendMessage(msg.text, msg.sender));
     };
 
-    // Save chat history to localStorage
     function saveChatHistory() {
       const messages = [];
-      document.querySelectorAll('.bubble').forEach(bubble => {
+      document.querySelectorAll(".bubble").forEach(bubble => {
         messages.push({
           text: bubble.innerText,
           sender: bubble.classList.contains("user") ? "user" : "bot"
@@ -144,13 +186,14 @@
       localStorage.setItem("chatHistory", JSON.stringify(messages));
     }
 
-    function appendMessage(html, sender) {
+    function appendMessage(text, sender) {
       const msg = document.createElement("div");
       msg.className = `bubble ${sender}`;
-      msg.innerHTML = html;
+      msg.innerHTML = text;
       chatBox.appendChild(msg);
       chatBox.scrollTop = chatBox.scrollHeight;
-      saveChatHistory(); // Save chat history after appending each message
+      saveChatHistory();
+      return msg;
     }
 
     function handleEnter(e) {
@@ -160,45 +203,82 @@
       }
     }
 
+    function resetChat() {
+      localStorage.removeItem("chatHistory");
+      chatBox.innerHTML = "";
+    }
+
     async function sendMessage() {
       const message = input.value.trim();
       if (!message) return;
-
       appendMessage(escapeHtml(message), "user");
       input.value = "";
 
-      appendMessage("...", "bot");
+      const typingIndicator = appendMessage("<em>Brother is typing...</em>", "bot");
 
       try {
         const response = await fetch("https://ai-chatbot-rk59.onrender.com/chat", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message })
         });
 
         const data = await response.json();
         const reply = data?.reply || "No reply from AI.";
-
-        const botBubble = document.querySelectorAll(".bubble.bot");
-        if (botBubble.length > 0) {
-          botBubble[botBubble.length - 1].innerHTML = reply;
-        }
+        typingIndicator.innerHTML = escapeHtml(reply);
+        saveChatHistory();
       } catch (err) {
-        const botBubble = document.querySelectorAll(".bubble.bot");
-        if (botBubble.length > 0) {
-          botBubble[botBubble.length - 1].innerHTML = "Error contacting AI.";
-        }
+        typingIndicator.innerHTML = "Error connecting to AI server.";
       }
     }
 
     function escapeHtml(text) {
-      return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
     }
+
+    emojiBtn.addEventListener("click", () => {
+      emojiPicker.style.display = emojiPicker.style.display === "block" ? "none" : "block";
+    });
+
+    function addEmoji(emoji) {
+      input.value += emoji;
+      emojiPicker.style.display = "none";
+      input.focus();
+    }
+
+    const recognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    ? new (window.SpeechRecognition || window.webkitSpeechRecognition)()
+    : null;
+
+  function startVoice() {
+    if (!recognition) {
+      alert("Speech Recognition not supported in this browser.");
+      return;
+    }
+
+    recognition.lang = 'en-US';
+    recognition.start();
+
+    recognition.onstart = function () {
+      console.log("Voice recognition started. Speak now.");
+    };
+
+    recognition.onresult = function (event) {
+      const transcript = event.results[0][0].transcript;
+      input.value += transcript;
+    };
+
+    recognition.onerror = function (event) {
+      console.error("Speech recognition error:", event.error);
+    };
+
+    recognition.onend = function () {
+      console.log("Voice recognition ended.");
+    };
+  }
+
   </script>
 </body>
 </html>
