@@ -278,6 +278,44 @@
       console.log("Voice recognition ended.");
     };
   }
+    function buildHistoryForAI() {
+  const raw = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+  return raw.map(msg => ({
+    role: msg.sender === "user" ? "user" : "assistant",
+    content: msg.text
+  }));
+}
+
+async function sendMessage() {
+  const message = input.value.trim();
+  if (!message) return;
+  appendMessage(escapeHtml(message), "user");
+  input.value = "";
+  appendMessage("<em>Brother is typing...</em>", "bot");
+
+  const fullMessages = buildHistoryForAI();
+
+  try {
+    const response = await fetch("https://ai-chatbot-rk59.onrender.com/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, history: fullMessages })
+    });
+
+    const data = await response.json();
+    const botBubble = document.querySelectorAll(".bubble.bot");
+    if (botBubble.length > 0) {
+      botBubble[botBubble.length - 1].innerHTML = escapeHtml(data?.reply || "No reply from AI.");
+    }
+    saveChatHistory();
+  } catch (err) {
+    const botBubble = document.querySelectorAll(".bubble.bot");
+    if (botBubble.length > 0) {
+      botBubble[botBubble.length - 1].innerHTML = "Error contacting AI server.";
+    }
+  }
+}
+
 
   </script>
 </body>
