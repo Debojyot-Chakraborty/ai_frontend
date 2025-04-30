@@ -172,10 +172,17 @@
   const emojiBtn = document.getElementById("emoji-btn");
 
   // Load from localStorage
-  window.onload = function () {
-    history = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-    history.forEach(msg => appendMessage(msg.content, msg.role === "user" ? "user" : "bot"));
-  };
+ window.onload = function () {
+  const stored = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+  stored.forEach(msg => {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `bubble ${msg.role === "user" ? "user" : "bot"}`;
+    msgDiv.innerHTML = msg.content;
+    chatBox.appendChild(msgDiv);
+  });
+  chatBox.scrollTop = chatBox.scrollHeight;
+  history = stored;
+};
 
   function appendMessage(text, sender) {
     const msg = document.createElement("div");
