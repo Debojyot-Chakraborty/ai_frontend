@@ -165,15 +165,17 @@
   </div>
 
   <script>
+    let history = [];
     const chatBox = document.getElementById("chat-box");
     const input = document.getElementById("input");
     const emojiPicker = document.getElementById("emoji-picker");
     const emojiBtn = document.getElementById("emoji-btn");
 
     window.onload = function () {
-      const chatHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-      chatHistory.forEach(msg => appendMessage(msg.text, msg.sender));
-    };
+  history = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+  history.forEach(msg => appendMessage(msg.content, msg.role === "user" ? "user" : "bot"));
+};
+
 
     function saveChatHistory() {
       const messages = [];
@@ -186,15 +188,22 @@
       localStorage.setItem("chatHistory", JSON.stringify(messages));
     }
 
-    function appendMessage(text, sender) {
-      const msg = document.createElement("div");
-      msg.className = `bubble ${sender}`;
-      msg.innerHTML = text;
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-      saveChatHistory();
-      return msg;
-    }
+  function appendMessage(text, sender) {
+  const msg = document.createElement("div");
+  msg.className = `bubble ${sender}`;
+  msg.innerHTML = text;
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  history.push({
+    role: sender === "user" ? "user" : "assistant",
+    content: text
+  });
+
+  localStorage.setItem("chatHistory", JSON.stringify(history));
+  return msg;
+}
+
 
     function handleEnter(e) {
       if (e.key === "Enter") {
@@ -204,33 +213,34 @@
     }
 
     function resetChat() {
-      localStorage.removeItem("chatHistory");
-      chatBox.innerHTML = "";
-    }
+  history = [];
+  localStorage.removeItem("chatHistory");
+  chatBox.innerHTML = "";
+}
+
 
     async function sendMessage() {
-      const message = input.value.trim();
-      if (!message) return;
-      appendMessage(escapeHtml(message), "user");
-      input.value = "";
+  const message = input.value.trim();
+  if (!message) return;
+  appendMessage(escapeHtml(message), "user");
+  input.value = "";
+  const typingIndicator = appendMessage("<em>Brother is typing...</em>", "bot");
 
-      const typingIndicator = appendMessage("<em>Brother is typing...</em>", "bot");
+  try {
+    const response = await fetch("https://ai-chatbot-rk59.onrender.com/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, history })
+    });
 
-      try {
-        const response = await fetch("https://ai-chatbot-rk59.onrender.com/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message })
-        });
+    const data = await response.json();
+    const reply = data?.reply || "No reply from AI.";
+    typingIndicator.innerHTML = escapeHtml(reply);
+  } catch (err) {
+    typingIndicator.innerHTML = "Error connecting to AI server.";
+  }
+}
 
-        const data = await response.json();
-        const reply = data?.reply || "No reply from AI.";
-        typingIndicator.innerHTML = escapeHtml(reply);
-        saveChatHistory();
-      } catch (err) {
-        typingIndicator.innerHTML = "Error connecting to AI server.";
-      }
-    }
 
     function escapeHtml(text) {
       const div = document.createElement("div");
