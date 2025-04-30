@@ -223,14 +223,14 @@ async function sendMessage() {
   const message = input.value.trim();
   if (!message) return;
 
-  // Add user message to UI and history
-  const userBubble = appendMessage(escapeHtml(message), "user");
+  appendMessage(escapeHtml(message), "user");
   input.value = "";
 
-  // Show typing indicator
-  const typingBubble = appendMessage("<em>Brother is typing...</em>", "bot");
+  const typingIndicator = appendMessage("<em>Brother is typing...</em>", "bot");
 
-  const fullHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]").map(msg => ({
+  // Build history correctly from localStorage
+  const chatHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+  const historyForAI = chatHistory.map(msg => ({
     role: msg.sender === "user" ? "user" : "assistant",
     content: msg.text
   }));
@@ -239,22 +239,18 @@ async function sendMessage() {
     const response = await fetch("https://ai-chatbot-rk59.onrender.com/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, history: fullHistory })
+      body: JSON.stringify({ message, history: historyForAI })
     });
 
     const data = await response.json();
     const reply = data?.reply || "No reply from AI.";
+    typingIndicator.innerHTML = escapeHtml(reply);
 
-    typingBubble.innerHTML = escapeHtml(reply);
-
-    // Save bot reply in localStorage too
-    const newHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-    newHistory.push({ text: message, sender: "user" });
-    newHistory.push({ text: reply, sender: "bot" });
-    localStorage.setItem("chatHistory", JSON.stringify(newHistory));
-
+    // Save bot reply in chat history
+    const updatedHistory = [...chatHistory, { text: reply, sender: "bot" }];
+    localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
   } catch (err) {
-    typingBubble.innerHTML = "Error connecting to AI server.";
+    typingIndicator.innerHTML = "Error contacting AI.";
   }
 }
 
