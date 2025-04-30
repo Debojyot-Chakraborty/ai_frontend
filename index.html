@@ -228,10 +228,10 @@ async function sendMessage() {
 
   const typingIndicator = appendMessage("<em>Brother is typing...</em>", "bot");
 
-  const chatHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-  const historyForAI = chatHistory.map(msg => ({
-    role: msg.sender === "user" ? "user" : "assistant",
-    content: msg.text
+  // Use the same format for chat history
+  const historyForAI = history.map(msg => ({
+    role: msg.sender || msg.role,
+    content: msg.text || msg.content
   }));
 
   try {
@@ -245,14 +245,14 @@ async function sendMessage() {
     const reply = data?.reply || "No reply from AI.";
     typingIndicator.innerHTML = escapeHtml(reply);
 
-    // Update chat history in localStorage
-    chatHistory.push({ text: reply, sender: "bot" });
-    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    // Save properly in history and localStorage
+    const newEntry = { text: reply, sender: "bot" };
+    history.push({ role: "assistant", content: reply });
+    localStorage.setItem("chatHistory", JSON.stringify(history));
   } catch (err) {
     typingIndicator.innerHTML = "Error contacting AI.";
   }
 }
-
 
     function addEmoji(emoji) {
       input.value += emoji;
