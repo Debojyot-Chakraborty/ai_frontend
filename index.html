@@ -228,7 +228,6 @@ async function sendMessage() {
 
   const typingIndicator = appendMessage("<em>Brother is typing...</em>", "bot");
 
-  // Build history correctly from localStorage
   const chatHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
   const historyForAI = chatHistory.map(msg => ({
     role: msg.sender === "user" ? "user" : "assistant",
@@ -246,9 +245,9 @@ async function sendMessage() {
     const reply = data?.reply || "No reply from AI.";
     typingIndicator.innerHTML = escapeHtml(reply);
 
-    // Save bot reply in chat history
-    const updatedHistory = [...chatHistory, { text: reply, sender: "bot" }];
-    localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
+    // Update chat history in localStorage
+    chatHistory.push({ text: reply, sender: "bot" });
+    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
   } catch (err) {
     typingIndicator.innerHTML = "Error contacting AI.";
   }
