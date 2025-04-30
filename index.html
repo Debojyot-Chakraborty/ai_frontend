@@ -164,89 +164,95 @@
     <span onclick="addEmoji('🙏')">🙏</span>
   </div>
 
-  <script>
-    const chatBox = document.getElementById("chat-box");
-    const input = document.getElementById("input");
-    const emojiPicker = document.getElementById("emoji-picker");
-    const emojiBtn = document.getElementById("emoji-btn");
+ <script>
+  const chatBox = document.getElementById("chat-box");
+  const input = document.getElementById("input");
+  const emojiPicker = document.getElementById("emoji-picker");
+  const emojiBtn = document.getElementById("emoji-btn");
 
-    window.onload = function () {
-      const chatHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-      chatHistory.forEach(msg => appendMessage(msg.text, msg.sender));
-    };
+  let history = [];
 
-    function saveChatHistory() {
-      const messages = [];
-      document.querySelectorAll(".bubble").forEach(bubble => {
-        messages.push({
-          text: bubble.innerText,
-          sender: bubble.classList.contains("user") ? "user" : "bot"
-        });
-      });
-      localStorage.setItem("chatHistory", JSON.stringify(messages));
-    }
+  window.onload = function () {
+    const stored = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+    history = stored.map(h => ({
+      role: h.sender === "user" ? "user" : "assistant",
+      content: h.text
+    }));
+    stored.forEach(h => appendMessage(h.text, h.sender));
+  };
 
-    function appendMessage(text, sender) {
-      const msg = document.createElement("div");
-      msg.className = `bubble ${sender}`;
-      msg.innerHTML = text;
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-      saveChatHistory();
-      return msg;
-    }
+  function appendMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.className = `bubble ${sender}`;
+    msg.innerHTML = text;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-    function handleEnter(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        sendMessage();
-      }
-    }
-
-    function resetChat() {
-      localStorage.removeItem("chatHistory");
-      chatBox.innerHTML = "";
-    }
-
-   async function sendMessage() {
-  const message = input.value.trim();
-  if (!message) return;
-
-  appendMessage(message, "user");
-  input.value = "";
-  const typing = appendMessage("<em>Typing...</em>", "bot");
-
-  try {
-    const res = await fetch("https://your-backend-url/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, history })
+    // Store in history
+    history.push({
+      role: sender === "user" ? "user" : "assistant",
+      content: text
     });
 
-    const data = await res.json();
-    typing.innerHTML = data.reply;
-  } catch (err) {
-    typing.innerHTML = "Failed to connect to AI.";
+    localStorage.setItem("chatHistory", JSON.stringify(
+      history.map(h => ({ sender: h.role === "user" ? "user" : "bot", text: h.content }))
+    ));
   }
-}
 
-    function escapeHtml(text) {
-      const div = document.createElement("div");
-      div.textContent = text;
-      return div.innerHTML;
+  function resetChat() {
+    history = [];
+    localStorage.removeItem("chatHistory");
+    chatBox.innerHTML = "";
+  }
+
+  function handleEnter(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendMessage();
     }
+  }
 
-    emojiBtn.addEventListener("click", () => {
-      emojiPicker.style.display = emojiPicker.style.display === "block" ? "none" : "block";
-    });
+  async function sendMessage() {
+    const message = input.value.trim();
+    if (!message) return;
 
-    function addEmoji(emoji) {
-      input.value += emoji;
-      emojiPicker.style.display = "none";
-      input.focus();
+    appendMessage(message, "user");
+    input.value = "";
+    const typing = appendMessage("<em>HUDZZ is typing...</em>", "bot");
+
+    try {
+      const response = await fetch("https://ai-chatbot-rk59.onrender.com/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, history })
+      });
+
+      const data = await response.json();
+      typing.innerHTML = escapeHtml(data?.reply || "No reply from AI.");
+    } catch (err) {
+      typing.innerHTML = "Error connecting to AI.";
     }
+  }
 
-    const recognition = window.SpeechRecognition || window.webkitSpeechRecognition
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Emoji
+  emojiBtn.addEventListener("click", () => {
+    emojiPicker.style.display = emojiPicker.style.display === "block" ? "none" : "block";
+  });
+
+  function addEmoji(emoji) {
+    input.value += emoji;
+    emojiPicker.style.display = "none";
+    input.focus();
+  }
+
+  // Speech to Text
+  const recognition = window.SpeechRecognition || window.webkitSpeechRecognition
     ? new (window.SpeechRecognition || window.webkitSpeechRecognition)()
     : null;
 
@@ -259,95 +265,10 @@
     recognition.lang = 'en-US';
     recognition.start();
 
-    recognition.onstart = function () {
-      console.log("Voice recognition started. Speak now.");
-    };
-
     recognition.onresult = function (event) {
-      const transcript = event.results[0][0].transcript;
-      input.value += transcript;
-    };
-
-    recognition.onerror = function (event) {
-      console.error("Speech recognition error:", event.error);
-    };
-
-    recognition.onend = function () {
-      console.log("Voice recognition ended.");
+      input.value += event.results[0][0].transcript;
     };
   }
-    function buildHistoryForAI() {
-  const raw = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-  return raw.map(msg => ({
-    role: msg.sender === "user" ? "user" : "assistant",
-    content: msg.text
-  }));
-}
-
-async function sendMessage() {
-  const message = input.value.trim();
-  if (!message) return;
-  appendMessage(escapeHtml(message), "user");
-  input.value = "";
-  appendMessage("<em>Brother is typing...</em>", "bot");
-
-  const fullMessages = buildHistoryForAI();
-
-  try {
-    const response = await fetch("https://ai-chatbot-rk59.onrender.com/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, history: fullMessages })
-    });
-
-    const data = await response.json();
-    const botBubble = document.querySelectorAll(".bubble.bot");
-    if (botBubble.length > 0) {
-      botBubble[botBubble.length - 1].innerHTML = escapeHtml(data?.reply || "No reply from AI.");
-    }
-    saveChatHistory();
-  } catch (err) {
-    const botBubble = document.querySelectorAll(".bubble.bot");
-    if (botBubble.length > 0) {
-      botBubble[botBubble.length - 1].innerHTML = "Error contacting AI server.";
-    }
-  }
-}
-    let history = [];
-
-function appendMessage(text, sender) {
-  const msg = document.createElement("div");
-  msg.className = `bubble ${sender}`;
-  msg.innerHTML = text;
-  chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  // Update history
-  history.push({
-    role: sender === "user" ? "user" : "assistant",
-    content: text
-  });
-
-  localStorage.setItem("chatHistory", JSON.stringify(history));
-}
-
-window.onload = function () {
-  const stored = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-  history = stored;
-
-  stored.forEach(h => {
-    appendMessage(h.content, h.role === "user" ? "user" : "bot");
-  });
-};
-
-function resetChat() {
-  history = [];
-  localStorage.removeItem("chatHistory");
-  chatBox.innerHTML = "";
-}
-
-
-
-  </script>
+</script>
 </body>
 </html>
