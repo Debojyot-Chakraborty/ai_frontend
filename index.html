@@ -231,10 +231,8 @@
       });
 
       const data = await response.json();
-      const reply = data?.reply || "No reply from AI.";
-      typingIndicator.innerHTML = escapeHtml(reply);
-
-      // Update reply in history (not regenerate)
+     const reply = data?.reply || "No reply from AI.";
+typingIndicator.innerHTML = reply;  
       history.push({ role: "assistant", content: reply });
       localStorage.setItem("chatHistory", JSON.stringify(history));
     } catch (err) {
