@@ -163,7 +163,7 @@
     <span onclick="addEmoji('💀')">💀</span>
     <span onclick="addEmoji('🙏')">🙏</span>
   </div>
-
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
   let history = [];
   const chatBox = document.getElementById("chat-box");
@@ -171,6 +171,9 @@
   const emojiPicker = document.getElementById("emoji-picker");
   const emojiBtn = document.getElementById("emoji-btn");
 
+
+
+  typingIndicator.innerHTML = marked.parse(reply);
   // Load from localStorage
  window.onload = function () {
   const stored = JSON.parse(localStorage.getItem("chatHistory") || "[]");
